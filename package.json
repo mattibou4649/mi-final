@@ -1,0 +1,15 @@
+{
+  "name": "multiplayer-threejs",
+  "version": "0.0.1",
+  "description": "realtime multiplayer for browser",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.10.2",
+    "express-handlebars": "^3.0.2",
+    "socket.io": "^1.7.4",
+    "three": "^0.71.0"
+  }
+}
