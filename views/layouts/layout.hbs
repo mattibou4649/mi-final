@@ -67,6 +67,10 @@
         socket.on('shootBullet', function(data){
             shootBullet(data);
         })
+
+        socket.on('endGame', function(data){
+            finishAndPost();
+        })
     </script>
 </body>
 </html>

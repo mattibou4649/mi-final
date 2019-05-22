@@ -277,7 +277,7 @@ function animate(){
                 bulletCollided = true;
                 playerObj.score += 1;
                 if(playerObj.score >= 5){
-                    
+                    socket.emit('playerWon', $("#playerId").html());
                 }
                 console.log(playerObj.score)
                 continue;
@@ -588,6 +588,10 @@ var shootBullet = data => {
     scene.add(bullet);
     shot = true;
     player.canShoot = 80;
+}
+
+var finishAndPost = () => {
+    location.reload();
 }
 
 window.addEventListener('keydown', keyDown);
