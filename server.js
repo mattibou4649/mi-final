@@ -1,7 +1,7 @@
 const express = require('express')
 const app = require('express')();
 const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const socketIO = require('socket.io');
 const world = require('./js/server_world');
 const path = require('path');
 const hbs = require('express-handlebars');
@@ -61,6 +61,11 @@ app.get('/logout', (req, res) => {
     res.redirect('/auth/facebook');
 });
 
+app.set('port', (process.env.OPENSHIFT_NODEJS_PORT || 3000));
+const server = app.listen(app.get('port'), () => console.log(`Listening`)); 
+
+const io = socketIO(server);
+
 
 // Handle connection
 io.on('connection', (socket) => {
@@ -119,8 +124,6 @@ io.on('connection', (socket) => {
 
 });
 
-app.set('port', (process.env.PORT || 5000));
-
-app.listen(app.get('port'), function(){
-    console.log( "Listening");
-})
+// app.listen(app.get('port'), function(){
+//     console.log( "Listening");
+// })
