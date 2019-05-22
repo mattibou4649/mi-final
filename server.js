@@ -89,7 +89,7 @@ io.on('connection', (socket) => {
 
 // Handle environment changes
 var port = process.env.OPENSHIFT_NODEJS_PORT || 3000;
-var ip_address = process.env.OPENSHIFT_NODEJS_IP || '172.16.6.218';
+var ip_address = process.env.OPENSHIFT_NODEJS_IP || 'localhost';
  
 http.listen(port, ip_address, () => {
     console.log( "Listening on " + ip_address + ", server_port " + port );

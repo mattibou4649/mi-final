@@ -37,19 +37,19 @@ var MORE_THAN_ONE = false;
 
 // Models index
 var models = {
-	tent: {
-		obj:"/models/Tent_Poles_01.obj",
-		mtl:"/models/Tent_Poles_01.mtl",
-		mesh: null
-	},
-	campfire: {
-		obj:"/models/Campfire_01.obj",
-		mtl:"/models/Campfire_01.mtl",
-		mesh: null
-	},
-	pirateship: {
-		obj:"/models/Pirateship.obj",
-		mtl:"/models/Pirateship.mtl",
+	// tent: {
+	// 	obj:"/models/Tent_Poles_01.obj",
+	// 	mtl:"/models/Tent_Poles_01.mtl",
+	// 	mesh: null
+	// },
+	// campfire: {
+	// 	obj:"/models/Campfire_01.obj",
+	// 	mtl:"/models/Campfire_01.mtl",
+	// 	mesh: null
+	// },
+	scene: {
+		obj:"/models/wall.obj",
+		mtl:"/models/wall.mtl",
 		mesh: null
 	},
 	// uzi: {
@@ -88,14 +88,14 @@ function loadWorld(){
         };
         
         
-        mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(1,1,1),
-            new THREE.MeshPhongMaterial({color:0xff4444, wireframe:USE_WIREFRAME})
-        );
-        mesh.position.y += 1;
-        mesh.receiveShadow = true;
-        mesh.castShadow = true;
-        scene.add(mesh);
+        // mesh = new THREE.Mesh(
+        //     new THREE.BoxGeometry(1,1,1),
+        //     new THREE.MeshPhongMaterial({color:0xff4444, wireframe:USE_WIREFRAME})
+        // );
+        // mesh.position.y += 1;
+        // mesh.receiveShadow = true;
+        // mesh.castShadow = true;
+        // scene.add(mesh);
         
         meshFloor = new THREE.Mesh(
             new THREE.PlaneGeometry(500,500, 10,10),
@@ -122,19 +122,19 @@ function loadWorld(){
         crateBumpMap = textureLoader.load("/js/crate0/crate0_bump.jpg");
         crateNormalMap = textureLoader.load("/js/crate0/crate0_normal.jpg");
         
-        crate = new THREE.Mesh(
-            new THREE.BoxGeometry(3,3,3),
-            new THREE.MeshPhongMaterial({
-                color:0xffffff,
-                map:crateTexture,
-                bumpMap:crateBumpMap,
-                normalMap:crateNormalMap
-            })
-        );
-        scene.add(crate);
-        crate.position.set(2.5, 3/2, 2.5);
-        crate.receiveShadow = true;
-        crate.castShadow = true;
+        // crate = new THREE.Mesh(
+        //     new THREE.BoxGeometry(3,3,3),
+        //     new THREE.MeshPhongMaterial({
+        //         color:0xffffff,
+        //         map:crateTexture,
+        //         bumpMap:crateBumpMap,
+        //         normalMap:crateNormalMap
+        //     })
+        // );
+        // scene.add(crate);
+        // crate.position.set(2.5, 3/2, 2.5);
+        // crate.receiveShadow = true;
+        // crate.castShadow = true;
         
         // Load models
         // REMEMBER: Loading in Javascript is asynchronous, so you need
@@ -193,13 +193,17 @@ function loadWorld(){
 // Runs when all resources are loaded
 function onResourcesLoaded(){
 	
-	// Clone models into meshes.
+    /*
+    // Clone models into meshes.
     meshes["tent1"] = models.tent.mesh.clone();
     meshes["tent2"] = models.tent.mesh.clone();
 	meshes["campfire1"] = models.campfire.mesh.clone();
 	meshes["campfire2"] = models.campfire.mesh.clone();
-    meshes["pirateship"] = models.pirateship.mesh.clone();
+    */
     
+    meshes["scene"] = models.scene.mesh.clone();
+    
+    /*
     objects.push(meshes["tent1"]);
     objects.push(meshes["tent2"]);
 	
@@ -214,11 +218,13 @@ function onResourcesLoaded(){
 	meshes["campfire2"].position.set(-8, 0, 1);
 	
 	scene.add(meshes["campfire1"]);
-	scene.add(meshes["campfire2"]);
+    scene.add(meshes["campfire2"]);
+    */
 	
-	meshes["pirateship"].position.set(-11, -1, 1);
-	meshes["pirateship"].rotation.set(0, Math.PI, 0); // Rotate it to face the other way.
-    scene.add(meshes["pirateship"]);
+	meshes["scene"].position.set(-11, 0, 1);
+    meshes["scene"].rotation.set(0, Math.PI, 0); // Rotate it to face the other way.
+    meshes["scene"].scale.set(2, 2, 2);
+    scene.add(meshes["scene"]);
 }
 
 function animate(){
@@ -236,16 +242,16 @@ function animate(){
 		return;
     }
 
-    if(otherPlayers.length < 1) {
-        requestAnimationFrame(animate);
+    // if(otherPlayers.length < 1) {
+    //     requestAnimationFrame(animate);
 		
-		loadingScreen.box.position.x -= 0.05;
-		if( loadingScreen.box.position.x < -10 ) loadingScreen.box.position.x = 10;
-		loadingScreen.box.position.y = Math.sin(loadingScreen.box.position.x);
+	// 	loadingScreen.box.position.x -= 0.05;
+	// 	if( loadingScreen.box.position.x < -10 ) loadingScreen.box.position.x = 10;
+	// 	loadingScreen.box.position.y = Math.sin(loadingScreen.box.position.x);
 		
-		renderer.render(loadingScreen.scene, loadingScreen.camera);
-		return;
-    }
+	// 	renderer.render(loadingScreen.scene, loadingScreen.camera);
+	// 	return;
+    // }
 
     requestAnimationFrame(animate);
     
@@ -253,11 +259,11 @@ function animate(){
 	var time = Date.now() * 0.0005;
 	var delta = clock.getDelta();
 	
-	mesh.rotation.x += 0.01;
-	mesh.rotation.y += 0.02;
-	crate.rotation.y += 0.01;
+	// mesh.rotation.x += 0.01;
+	// mesh.rotation.y += 0.02;
+	// crate.rotation.y += 0.01;
 	// Uncomment for absurdity!
-    // meshes["pirateship"].rotation.z += 0.01;
+    // meshes["scene"].rotation.z += 0.01;
     // go through bullets array and update position
 	// remove bullets when appropriate
     for(var index=0; index<bullets.length; index+=1){
@@ -277,9 +283,9 @@ function animate(){
             var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
             var collisionResults = ray.intersectObjects(objects, true);
             if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() && bulletCollided === false) {
-                console.log("collided");
+                // console.log("collided");
                 bulletCollided = true;
-                console.log(playerObj)
+                // console.log(playerObj)
                 // if(collisionResults[0].object.parent === meshes["tent1"]){
                 //     scene.remove(collisionResults[0].object.parent);
                 // }
