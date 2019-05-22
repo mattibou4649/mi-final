@@ -8,6 +8,8 @@ var mixers = [];
 var otherMixers = [];
 var deltaTime;
 
+var raycaster = new THREE.Raycaster();
+
 var keyboard = {};
 var player = { height:1.8, speed:0.2, turnSpeed:Math.PI*0.02, canShoot:0 };
 var playerObj = {};
@@ -15,6 +17,7 @@ var playerData, playerId;
 var objects = [];
 var otherPlayers = [], otherPlayersId = [];
 var bullets = [];
+var forward, side;
 var USE_WIREFRAME = false;
 
 var loadingScreen = {
@@ -110,11 +113,11 @@ function loadWorld(){
         scene.add(ambientLight);
         
         light = new THREE.PointLight(0xffffff, 0.2, 100000000);
-        light.position.set(-3,6,-3);
+        light.position.set(-11,6,-3);
         light.castShadow = true;
         light.shadow.camera.near = 0.1;
         light.shadow.camera.far = 25;
-        // scene.add(light);
+        scene.add(light);
         
         
         var textureLoader = new THREE.TextureLoader(loadingManager);
@@ -132,7 +135,7 @@ function loadWorld(){
         //     })
         // );
         // scene.add(crate);
-        // crate.position.set(2.5, 3/2, 2.5);
+        // crate.position.set(-12, 3/2, 2.5);
         // crate.receiveShadow = true;
         // crate.castShadow = true;
         
@@ -221,9 +224,10 @@ function onResourcesLoaded(){
     scene.add(meshes["campfire2"]);
     */
 	
-	meshes["scene"].position.set(-11, 0, 1);
+	meshes["scene"].position.set(-11, -1, 1);
     meshes["scene"].rotation.set(0, Math.PI, 0); // Rotate it to face the other way.
-    meshes["scene"].scale.set(2, 2, 2);
+    meshes["scene"].scale.set(3, 3, 3);
+    objects.push(meshes["scene"]);
     scene.add(meshes["scene"]);
 }
 
@@ -264,6 +268,7 @@ function animate(){
 	// crate.rotation.y += 0.01;
 	// Uncomment for absurdity!
     // meshes["scene"].rotation.z += 0.01;
+
     // go through bullets array and update position
 	// remove bullets when appropriate
     for(var index=0; index<bullets.length; index+=1){
@@ -281,9 +286,9 @@ function animate(){
             var directionVector = globalVertex.sub(bullets[index].position);
             
             var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
-            var collisionResults = ray.intersectObjects(objects, true);
+            var collisionResults = ray.intersectObjects(otherPlayers, true);
             if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() && bulletCollided === false) {
-                // console.log("collided");
+                console.log("collided");
                 bulletCollided = true;
                 // console.log(playerObj)
                 // if(collisionResults[0].object.parent === meshes["tent1"]){
@@ -293,19 +298,6 @@ function animate(){
             }
         }	
     }
-
-    // var originPoint = playerObj.position.clone();
-    // for (var vertexIndex = 0; vertexIndex < playerObj.children[0].geometry.vertices.length; vertexIndex++){
-    //     var localVertex = playerObj.geometry.vertices[vertexIndex].clone();
-    //     var globalVertex = localVertex.applyMatrix4( playerObj.matrix );
-    //     var directionVector = globalVertex.sub( playerObj.position );
-        
-    //     var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
-    //     var collisionResults = ray.intersectObjects(objects, true);
-    //     if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
-    //         console.log("collided");
-    //     }
-    // }
 
     socket.on('moveFrontServer', function(){
         otherMixers.forEach(b => {
@@ -319,34 +311,89 @@ function animate(){
         });
     })
 	
-	if(keyboard[87]){ // W key
-		camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
+    if(keyboard[87]){ // W key
+        var originPoint = playerObj.position.clone();
+        for (var vertexIndex = 0; vertexIndex < playerObj.geometry.vertices.length; vertexIndex++){
+            var localVertex = playerObj.geometry.vertices[vertexIndex].clone();
+            var globalVertex = localVertex.applyMatrix4(playerObj.matrix);
+            var directionVector = globalVertex.sub(playerObj.position);
+            
+            var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+            var collisionResults = ray.intersectObjects(objects, true);
+            if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
+                camera.position.x -= -(Math.sin(camera.rotation.y) * player.speed);
+                camera.position.z -= -(-Math.cos(camera.rotation.y) * player.speed);
+                camera.position.x -= -(Math.sin(camera.rotation.y) * player.speed);
+                camera.position.z -= -(-Math.cos(camera.rotation.y) * player.speed);
+            }
+        }	
+        camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
         camera.position.z -= -Math.cos(camera.rotation.y) * player.speed;
         updatePlayerData();
-        mixers.forEach(b => {
-            b.update(delta * 0.0001);
-        });
         socket.emit('updatePosition', playerData);
         socket.emit('moveFrontClient');
-	}
-	if(keyboard[83]){ // S key
-		camera.position.x += Math.sin(camera.rotation.y) * player.speed;
+    }
+    
+    if(keyboard[83]){ // S key
+        var originPoint = playerObj.position.clone();
+        for (var vertexIndex = 0; vertexIndex < playerObj.geometry.vertices.length; vertexIndex++){
+            var localVertex = playerObj.geometry.vertices[vertexIndex].clone();
+            var globalVertex = localVertex.applyMatrix4(playerObj.matrix);
+            var directionVector = globalVertex.sub(playerObj.position);
+            
+            var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+            var collisionResults = ray.intersectObjects(objects, true);
+            if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
+                camera.position.x += -(Math.sin(camera.rotation.y) * player.speed);
+                camera.position.z += -(-Math.cos(camera.rotation.y) * player.speed); 
+                camera.position.x += -(Math.sin(camera.rotation.y) * player.speed);
+                camera.position.z += -(-Math.cos(camera.rotation.y) * player.speed);
+            }
+        }	
+        camera.position.x += Math.sin(camera.rotation.y) * player.speed;
         camera.position.z += -Math.cos(camera.rotation.y) * player.speed;
         updatePlayerData();
-        mixers.forEach(b => {
-            b.update(-delta * 0.0001);
-        });
         socket.emit('updatePosition', playerData);
         socket.emit('moveBackClient');
 	}
-	if(keyboard[65]){ // A key
-		camera.position.x += Math.sin(camera.rotation.y + Math.PI/2) * player.speed;
+    if(keyboard[65]){ // A key
+        var originPoint = playerObj.position.clone();
+        for (var vertexIndex = 0; vertexIndex < playerObj.geometry.vertices.length; vertexIndex++){
+            var localVertex = playerObj.geometry.vertices[vertexIndex].clone();
+            var globalVertex = localVertex.applyMatrix4(playerObj.matrix);
+            var directionVector = globalVertex.sub(playerObj.position);
+            
+            var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+            var collisionResults = ray.intersectObjects(objects, true);
+            if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
+                camera.position.x += -(Math.sin(camera.rotation.y + Math.PI/2) * player.speed);
+                camera.position.z += -(-Math.cos(camera.rotation.y + Math.PI/2) * player.speed);
+                camera.position.x += -(Math.sin(camera.rotation.y + Math.PI/2) * player.speed);
+                camera.position.z += -(-Math.cos(camera.rotation.y + Math.PI/2) * player.speed);
+            }
+        }	
+        camera.position.x += Math.sin(camera.rotation.y + Math.PI/2) * player.speed;
         camera.position.z += -Math.cos(camera.rotation.y + Math.PI/2) * player.speed;
         updatePlayerData();
         socket.emit('updatePosition', playerData);
 	}
-	if(keyboard[68]){ // D key
-		camera.position.x += Math.sin(camera.rotation.y - Math.PI/2) * player.speed;
+    if(keyboard[68]){ // D key
+        var originPoint = playerObj.position.clone();
+        for (var vertexIndex = 0; vertexIndex < playerObj.geometry.vertices.length; vertexIndex++){
+            var localVertex = playerObj.geometry.vertices[vertexIndex].clone();
+            var globalVertex = localVertex.applyMatrix4(playerObj.matrix);
+            var directionVector = globalVertex.sub(playerObj.position);
+            
+            var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+            var collisionResults = ray.intersectObjects(objects, true);
+            if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
+                camera.position.x += -(Math.sin(camera.rotation.y - Math.PI/2) * player.speed);
+                camera.position.z += -(-Math.cos(camera.rotation.y - Math.PI/2) * player.speed);
+                camera.position.x += -(Math.sin(camera.rotation.y - Math.PI/2) * player.speed);
+                camera.position.z += -(-Math.cos(camera.rotation.y - Math.PI/2) * player.speed);
+            }
+        }	
+        camera.position.x += Math.sin(camera.rotation.y - Math.PI/2) * player.speed;
         camera.position.z += -Math.cos(camera.rotation.y - Math.PI/2) * player.speed;
         updatePlayerData();
         socket.emit('updatePosition', playerData);
@@ -394,72 +441,28 @@ function keyUp(event){
 
 var createPlayer = data => {
     playerData = data;
+    
+    var cube = new THREE.Mesh(
+        new THREE.BoxGeometry(1,1,1),
+        new THREE.MeshPhongMaterial({
+            color:0xffffff,
+            map:crateTexture,
+            bumpMap:crateBumpMap,
+            normalMap:crateNormalMap
+        })
+    );
 
-    var cargador = new THREE.FBXLoader();
-    cargador.load('models/player.fbx', function(object) {
-        object.mixer = new THREE.AnimationMixer(object);
-        var action = object.mixer.clipAction(object.animations[0]);
+    playerObj = cube;
+    playerObj.position.set(data.x,data.y,data.z);
 
-        playerObj = object;
-        playerObj.position.set(data.x,data.y,data.z);
-        playerObj.scale.set(0.003,0.003,0.003);
+    playerId = data.playerId;
 
-        playerId = data.playerId;
+    objects.push(playerObj);
+    scene.add(playerObj);
 
-        mixers.push(playerObj.mixer);
-        action.play();
-        action.timescale = 1;
-
-        objects.push(playerObj);
-        scene.add(playerObj);
-
-        updateCameraPosition();
-        
-        // camera.lookAt( player.position );
-        camera.lookAt(new THREE.Vector3(0,player.height,0));
-    })
-
-    // var mtlLoader = new THREE.MTLLoader(loadingManager);
-    // mtlLoader.load(models.uzi.mtl, materials => {
-    //     materials.preload();
-        
-    //     var objLoader = new THREE.OBJLoader(loadingManager);
-        
-    //     objLoader.setMaterials(materials);
-    //     objLoader.load(models.uzi.obj, mesh => {
-            
-    //         mesh.traverse(node => {
-    //             if( node instanceof THREE.Mesh ){
-    //                 if('castShadow' in models.uzi)
-    //                     node.castShadow = models.uzi.castShadow;
-    //                 else
-    //                     node.castShadow = true;
-                    
-    //                 if('receiveShadow' in models.uzi)
-    //                     node.receiveShadow = models.uzi.receiveShadow;
-    //                 else
-    //                     node.receiveShadow = true;
-    //             }
-    //         });
-    //         models.uzi.mesh = mesh;
-
-    //         playerObj = mesh;
-
-    //         playerObj.position.set(data.x,data.y,data.z);
-    //         playerObj.scale.set(10,10,10);
-
-    //         playerId = data.playerId;
-        
-    //         updateCameraPosition();
-        
-    //         objects.push( playerObj );
-    //         scene.add( playerObj );
-        
-    //         // camera.lookAt( player.position );
-    //         camera.lookAt(new THREE.Vector3(0,player.height,0));
-            
-    //     });
-    // });
+    updateCameraPosition();
+    
+    camera.lookAt(new THREE.Vector3(0,player.height,0));
 };
 
 var addOtherPlayer = data => {
@@ -467,17 +470,6 @@ var addOtherPlayer = data => {
     cargador.load('models/player.fbx', function(object) {
         object.mixer = new THREE.AnimationMixer(object);
         var action = object.mixer.clipAction(object.animations[0]);
-        // models.uzi.mesh = mesh;
-
-        // var otherPlayer = mesh;
-
-        // otherPlayer.position.set(data.x,data.y,data.z);
-        // otherPlayer.scale.set(10,10,10);
-
-        // otherPlayersId.push( data.playerId );
-        // otherPlayers.push( otherPlayer );
-        // objects.push( otherPlayer );
-        // scene.add( otherPlayer );
 
         var otherPlayer = object;
         otherPlayer.position.set(data.x,data.y - 1.1,data.z);
@@ -487,58 +479,11 @@ var addOtherPlayer = data => {
         action.play();
         action.timescale = 0.000000001;
 
-        otherPlayersId.push( data.playerId );
-        otherPlayers.push( otherPlayer );
-        objects.push( otherPlayer );
-        scene.add( otherPlayer );
+        otherPlayersId.push(data.playerId);
+        otherPlayers.push(otherPlayer);
+        objects.push(otherPlayer);
+        scene.add(otherPlayer);
     })
-
-    // var mtlLoader = new THREE.MTLLoader(loadingManager);
-    // mtlLoader.load(models.uzi.mtl, materials => {
-    //     materials.preload();
-        
-    //     var objLoader = new THREE.OBJLoader(loadingManager);
-        
-    //     objLoader.setMaterials(materials);
-    //     objLoader.load(models.uzi.obj, mesh => {
-            
-    //         mesh.traverse(node => {
-    //             if( node instanceof THREE.Mesh ){
-    //                 if('castShadow' in models.uzi)
-    //                     node.castShadow = models.uzi.castShadow;
-    //                 else
-    //                     node.castShadow = true;
-                    
-    //                 if('receiveShadow' in models.uzi)
-    //                     node.receiveShadow = models.uzi.receiveShadow;
-    //                 else
-    //                     node.receiveShadow = true;
-    //             }
-    //         });
-
-    //         models.uzi.mesh = mesh;
-
-    //         var otherPlayer = mesh;
-
-    //         otherPlayer.position.set(data.x,data.y,data.z);
-    //         otherPlayer.scale.set(10,10,10);
-
-    //         otherPlayersId.push( data.playerId );
-    //         otherPlayers.push( otherPlayer );
-    //         objects.push( otherPlayer );
-    //         scene.add( otherPlayer );
-    //     });
-    // });
-
-    // otherPlayer.position.x = data.x;
-    // otherPlayer.position.y = data.y;
-    // otherPlayer.position.z = data.z;
-
-    // otherPlayersId.push( data.playerId );
-    // otherPlayers.push( otherPlayer );
-    // objects.push( otherPlayer );
-    // scene.add( otherPlayer );
-
 };
 
 var updateCameraPosition = () => {
@@ -562,11 +507,6 @@ var updateCameraPosition = () => {
 		camera.rotation.y - Math.PI,
 		camera.rotation.z
     );
-
-    // camera.position.x = playerObj.position.x + 6 * Math.sin( playerObj.rotation.y );
-    // camera.position.y = playerObj.position.y + 6;
-    // camera.position.z = playerObj.position.z + 6 * Math.cos( playerObj.rotation.y );
-
 };
 
 var updatePlayerPosition = data => {
@@ -576,18 +516,6 @@ var updatePlayerPosition = data => {
     somePlayer.position.x = data.x;
     somePlayer.position.y = data.y - 0.5;
     somePlayer.position.z = data.z;
-
-    // somePlayer.position.set(
-	// 	data.x - Math.sin(data.r_x + Math.PI/6) * 0.75,
-	// 	data.y - 0.5 + Math.sin(time*4 + data.r_x + data.r_z)*0.01,
-	// 	data.x + Math.cos(data.r_x + Math.PI/6) * 0.75
-    // );
-    
-    // somePlayer.rotation.set(
-	// 	data.r_x,
-	// 	data.r_y - Math.PI,
-	// 	data.r_z
-    // );
 
     somePlayer.rotation.x = data.r_x;
     somePlayer.rotation.y = data.r_y;

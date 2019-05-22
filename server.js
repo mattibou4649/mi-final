@@ -85,6 +85,11 @@ io.on('connection', (socket) => {
         io.in('multiplayer1').emit('shootBullet', bullet)
     })
 
+    socket.on('playerDied', id => {
+        var bullet = world.createBullet(id);
+        io.in('multiplayer1').emit('endGame', winner)
+    })
+
 });
 
 // Handle environment changes
