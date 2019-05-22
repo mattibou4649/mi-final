@@ -1,7 +1,7 @@
-const FacebookStrategy = require('passport-facebook').Strategy;
-const dotenv = require('dotenv');
+var passport = require('passport');
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
-dotenv.config()
+// dotenv.config()
 
 module.exports = (passport) => {
   passport.serializeUser((user, done) => {
@@ -12,13 +12,13 @@ module.exports = (passport) => {
     done(null, user);
   });
 
-  passport.use(new FacebookStrategy({
-      clientID: process.env.FACEBOOK_APP_ID,
-      clientSecret: process.env.FACEBOOK_APP_SECRET,
-      callbackURL: "/auth/facebook/callback"
-    },
+  passport.use(new GoogleStrategy({
+    clientID: "1048765242182-m6gcevgv8kvppvdifi5s5icse6qmq1of.apps.googleusercontent.com",
+    clientSecret: "gTbgSwXdMFL3lM1fcFmOJKos",
+    callbackURL: "/auth/google/callback/"
+  },
     function(accessToken, refreshToken, profile, done) {
-      return done(null, profile);
+        return done(null, profile);
     }
   ));
 }

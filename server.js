@@ -36,17 +36,17 @@ const authenticate = (req, res, next) => {
         console.log("authenticated");
         return next(); 
     }
-    res.redirect('/auth/facebook');
+    res.redirect('/auth/google');
 }
 
 // Facebook login
-app.get('/auth/facebook', passport.authenticate('facebook'));
+app.get('/auth/google', passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }));
 
-app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/auth/facebook' }));
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/auth/google' }));
 
-app.get('/auth/facebook/logout', authenticate, (req, res) => {
+app.get('/auth/google/logout', authenticate, (req, res) => {
     req.logout();
-    res.redirect('/auth/facebook');
+    res.redirect('/auth/google');
 });
 
 // Routes
@@ -58,7 +58,7 @@ app.get('/', authenticate, (req, res) => {
 
 app.get('/logout', (req, res) => {
     req.logout();
-    res.redirect('/auth/facebook');
+    res.redirect('/auth/google');
 });
 
 app.set('port', (process.env.PORT || 3000));
