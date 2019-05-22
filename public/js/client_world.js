@@ -580,7 +580,7 @@ var shootBullet = data => {
     // add to scene, array, and set the delay to 10 frames
     bullets.push(bullet);
     scene.add(bullet);
-    player.canShoot = 50;
+    player.canShoot = 100;
 }
 
 window.addEventListener('keydown', keyDown);

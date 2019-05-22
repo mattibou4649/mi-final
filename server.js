@@ -42,7 +42,7 @@ const authenticate = (req, res, next) => {
 // Facebook login
 app.get('/auth/google', passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }));
 
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/auth/google' }));
+app.get('/auth/google/callback', passport.authenticate('google', { successRedirect: '/', failureRedirect: '/auth/google' }));
 
 app.get('/auth/google/logout', authenticate, (req, res) => {
     req.logout();
