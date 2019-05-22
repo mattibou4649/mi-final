@@ -61,7 +61,7 @@ app.get('/logout', (req, res) => {
     res.redirect('/auth/facebook');
 });
 
-app.set('port', (process.env.OPENSHIFT_NODEJS_PORT || 3000));
+app.set('port', (process.env.PORT || 3000));
 const server = app.listen(app.get('port'), () => console.log(`Listening`)); 
 
 const io = socketIO(server);
