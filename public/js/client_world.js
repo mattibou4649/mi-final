@@ -70,7 +70,7 @@ var socket = io();
 
 function loadWorld(){
     init();
-
+    
     function init(){
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(90, (window.innerWidth - 100) / (window.innerHeight - 100), 0.1, 1000);
@@ -89,16 +89,6 @@ function loadWorld(){
             RESOURCES_LOADED = true;
             onResourcesLoaded();
         };
-        
-        
-        // mesh = new THREE.Mesh(
-        //     new THREE.BoxGeometry(1,1,1),
-        //     new THREE.MeshPhongMaterial({color:0xff4444, wireframe:USE_WIREFRAME})
-        // );
-        // mesh.position.y += 1;
-        // mesh.receiveShadow = true;
-        // mesh.castShadow = true;
-        // scene.add(mesh);
         
         meshFloor = new THREE.Mesh(
             new THREE.PlaneGeometry(500,500, 10,10),
@@ -261,14 +251,8 @@ function animate(){
     
 	
 	var time = Date.now() * 0.0005;
-	var delta = clock.getDelta();
-	
-	// mesh.rotation.x += 0.01;
-	// mesh.rotation.y += 0.02;
-	// crate.rotation.y += 0.01;
-	// Uncomment for absurdity!
-    // meshes["scene"].rotation.z += 0.01;
-
+    var delta = clock.getDelta();
+    
     // go through bullets array and update position
 	// remove bullets when appropriate
     for(var index=0; index<bullets.length; index+=1){
@@ -290,10 +274,11 @@ function animate(){
             if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() && bulletCollided === false) {
                 console.log("collided");
                 bulletCollided = true;
-                // console.log(playerObj)
-                // if(collisionResults[0].object.parent === meshes["tent1"]){
-                //     scene.remove(collisionResults[0].object.parent);
-                // }
+                playerObj.score += 1;
+                if(playerObj.score >= 5){
+                    
+                }
+                console.log(playerObj.score)
                 continue;
             }
         }	
@@ -456,6 +441,7 @@ var createPlayer = data => {
     playerObj.position.set(data.x,data.y,data.z);
 
     playerId = data.playerId;
+    playerObj.score = 0;
 
     objects.push(playerObj);
     scene.add(playerObj);
@@ -473,7 +459,7 @@ var addOtherPlayer = data => {
 
         var otherPlayer = object;
         otherPlayer.position.set(data.x,data.y - 1.1,data.z);
-        otherPlayer.scale.set(0.0042,0.0042,0.0042);
+        otherPlayer.scale.set(0.005,0.005,0.005);
 
         otherMixers.push(otherPlayer.mixer);
         action.play();

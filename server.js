@@ -5,6 +5,10 @@ const io = require('socket.io')(http);
 const world = require('./js/server_world');
 const path = require('path');
 const hbs = require('express-handlebars');
+const passport = require('passport');
+const dotenv = require('dotenv');
+
+dotenv.config()
 
 // HBS
 app.engine('hbs', hbs({
@@ -18,22 +22,45 @@ app.set('view engine', 'hbs');
 // Public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Passport middleware
+app.use(require('express-session')({ secret: process.env.EXPRESS_SESSION_KEY, resave: true, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Passport config
+require('./config/passport')(passport);
+
+// Authenticate middleware
+const authenticate = (req, res, next) => {
+    if (req.isAuthenticated()) { 
+        console.log("authenticated");
+        return next(); 
+    }
+    res.redirect('/auth/facebook');
+}
+
+// Facebook login
+app.get('/auth/facebook', passport.authenticate('facebook'));
+
+app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/auth/facebook' }));
+
+app.get('/auth/facebook/logout', authenticate, (req, res) => {
+    req.logout();
+    res.redirect('/auth/facebook');
+});
+
 // Routes
-app.get('/', (req, res) => {
-    res.render('index');
+app.get('/', authenticate, (req, res) => {
+    res.render('index', {
+        user: req.user
+    });
 });
 
-app.get('/login', (req, res) => {
-    res.render('login', {
-        layout: 'other'
-    })
+app.get('/logout', (req, res) => {
+    req.logout();
+    res.redirect('/auth/facebook');
 });
 
-app.get('/register', (req, res) => {
-    res.render('register', {
-        layout: 'other'
-    })
-});
 
 // Handle connection
 io.on('connection', (socket) => {
