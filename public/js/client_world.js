@@ -401,7 +401,6 @@ function animate(){
         if(keyboard[32]){ // spacebar key
             if(shot === false){
                 socket.emit('playerShooting', playerId);
-                shot = true;
             }        
             bulletCollided = false
         }
@@ -587,6 +586,7 @@ var shootBullet = data => {
     // add to scene, array, and set the delay to 10 frames
     bullets.push(bullet);
     scene.add(bullet);
+    shot = true;
     player.canShoot = 80;
 }
 
