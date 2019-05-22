@@ -7,6 +7,7 @@ var crate, crateTexture, crateNormalMap, crateBumpMap;
 var mixers = [];
 var otherMixers = [];
 var deltaTime;
+var shot = false;
 
 var raycaster = new THREE.Raycaster();
 
@@ -397,10 +398,14 @@ function animate(){
 
     // shoot a bullet
     if(player.canShoot <= 0){
-        if(keyboard[32]){ // spacebar key        
-            socket.emit('playerShooting', playerId);
+        if(keyboard[32]){ // spacebar key
+            if(shot === false){
+                socket.emit('playerShooting', playerId);
+                shot = true;
+            }        
             bulletCollided = false
         }
+        shot = false;
     }
 
 	if(player.canShoot > 0) player.canShoot -= 1;
