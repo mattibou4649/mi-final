@@ -4,6 +4,7 @@ const http = require('http').Server(app);
 const socketIO = require('socket.io');
 const world = require('./js/server_world');
 const world2 = require('./js/server_world2');
+const world3 = require('./js/server_world3');
 const path = require('path');
 const hbs = require('express-handlebars');
 const passport = require('passport');
@@ -76,6 +77,13 @@ app.get('/mode2', authenticate, (req, res) => {
     });
 });
 
+app.get('/mode3', authenticate, (req, res) => {
+    res.render('mode3', {
+        layout: 'layout_two',
+        user: req.user
+    });
+});
+
 app.get('/logout', (req, res) => {
     req.logout();
     res.redirect('/auth/google');
@@ -104,6 +112,9 @@ io.on('connection', (socket) => {
 
     var id2 = null;
     var player2 = null;
+
+    var id3 = null;
+    var player3 = null;
 
     socket.on('connectMultiplayerOne', () => {
         socket.join('multiplayer1');
@@ -148,6 +159,11 @@ io.on('connection', (socket) => {
         if(player2) {
             io.in('multiplayer2').emit('removeOtherPlayer', player2);
             world2.removePlayer( player2 );
+        }
+
+        if(player3) {
+            io.in('multiplayer3').emit('removeOtherPlayer', player3);
+            world3.removePlayer( player3 );
         }
 
     });
@@ -201,5 +217,47 @@ io.on('connection', (socket) => {
 
     socket.on('playerWon2', (playerName) => {
         io.in('multiplayer2').emit('endGame', playerName)
+    })
+
+    //MULTIPLAYER 3
+    socket.on('connectMultiplayerThree', () => {
+        socket.join('multiplayer3');
+
+        id3 = socket.id;
+        world3.addPlayer(id3);
+
+        player3 = world3.playerForId(id3);
+        socket.emit('createPlayer3', player3);
+
+        socket.to('multiplayer3').emit('addOtherPlayer', player3);
+    })
+
+    socket.on('requestOldPlayers3', () => {
+        for (var i = 0; i < world3.players.length; i++){
+            if (world3.players[i].playerId != id3)
+                socket.emit('addOtherPlayer', world3.players[i]);
+        }
+    });
+
+    socket.on('updatePosition3', data => {
+        var newData = world3.updatePlayerData(data);
+        socket.to('multiplayer3').emit('updatePosition', newData);
+    });
+
+    socket.on('moveFrontClient3', () => {
+        socket.to('multiplayer3').emit('moveFrontServer');
+    });
+
+    socket.on('moveBackClient3', () => {
+        socket.to('multiplayer3').emit('moveBackServer');
+    });
+
+    socket.on('playerShooting3', id => {
+        var bullet = world3.createBullet(id);
+        io.in('multiplayer3').emit('shootBullet', bullet)
+    })
+
+    socket.on('playerWon3', (playerName) => {
+        io.in('multiplayer3').emit('endGame', playerName)
     })
 });
