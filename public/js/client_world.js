@@ -9,6 +9,7 @@ var otherMixers = [];
 var deltaTime;
 var shot = false;
 var timeClock = 0;
+var shaderpersonalizado;
 
 var raycaster = new THREE.Raycaster();
 
@@ -126,6 +127,11 @@ function loadWorld(){
         pMaterial = new THREE.PointsMaterial({
             color: 0xFFFFFF,
             size: 2
+        });
+
+        shaderpersonalizado = new THREE.ShaderMaterial({
+            vertexShader: document.getElementById('vertexShader').textContent,
+            fragmentShader: document.getElementById('fragmentShader').textContent,
         });
     
         var texture = new THREE.TextureLoader().load('/models/particle.png');
@@ -598,7 +604,7 @@ var shootBullet = data => {
     // creates a bullet as a Mesh object
     var bullet = new THREE.Mesh(
         new THREE.SphereGeometry(0.8,8,8),
-        new THREE.MeshBasicMaterial({color:0xffffff})
+        shaderpersonalizado
     );
     
     // position the bullet to come from the player's weapon

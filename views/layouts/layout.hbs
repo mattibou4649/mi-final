@@ -40,6 +40,20 @@
     <script src="js/FBXLoader.js"></script>
     <script src="js/client_world.js"></script>
 
+    <script type="x-shader/x-vertex" id="vertexShader">
+        void main() 
+        {
+          vec4 modelViewPosition = modelViewMatrix * vec4(position,1.0);
+          gl_Position = projectionMatrix * modelViewPosition;
+        }
+    </script>
+        
+    <script type="x-shader/x-fragment" id="fragmentShader">
+        void main() {
+            gl_FragColor = vec4(0.8, 0.8, 0.8, 1.0);
+        }
+    </script>
+
     <script>
         socket.on('updatePosition', function(data){
             updatePlayerPosition(data);
