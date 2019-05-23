@@ -280,7 +280,8 @@ function animate(){
                     socket.emit('playerWon', $("#playerId").html());
                 }
                 console.log(playerObj.score)
-                continue;
+                bullets.splice(index,1);
+                break;
             }
         }	
     }
@@ -548,7 +549,7 @@ var playerForId = id => {
 var shootBullet = data => {
     // creates a bullet as a Mesh object
     var bullet = new THREE.Mesh(
-        new THREE.SphereGeometry(0.05,8,8),
+        new THREE.SphereGeometry(0.8,8,8),
         new THREE.MeshBasicMaterial({color:0xffffff})
     );
     
