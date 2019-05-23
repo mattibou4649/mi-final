@@ -33,10 +33,44 @@
     <script src="js/plugins/pace/pace.min.js"></script>
 
     <!-- threejs -->
+    <script src="/socket.io/socket.io.js"></script>
     <script src="//threejs.org/build/three.js"></script>
     <script src="js/OBJLoader.js"></script>
     <script src="js/MTLLoader.js"></script>
     <script src="js/FBXLoader.js"></script>
+    <script src="js/client_world2.js"></script>
+
+    <script>
+        socket.on('updatePosition', function(data){
+            updatePlayerPosition(data);
+        });
+
+        socket.on('connect', function(){
+            loadWorld();
+            socket.emit('connectMultiplayerTwo');
+            socket.emit('requestOldPlayers2', {});
+        });
+
+        socket.on('createPlayer2', function(data){
+            createPlayer(data);
+        });
+
+        socket.on('addOtherPlayer', function(data){
+            addOtherPlayer(data);
+        });
+
+        socket.on('removeOtherPlayer', function(data){
+            removeOtherPlayer(data);
+        });
+
+        socket.on('shootBullet', function(data){
+            shootBullet(data);
+        })
+
+        socket.on('endGame', function(data){
+            finishAndPost(data);
+        })
+    </script>
 
 </body>
 </html>

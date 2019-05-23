@@ -3,6 +3,7 @@ const app = require('express')();
 const http = require('http').Server(app);
 const socketIO = require('socket.io');
 const world = require('./js/server_world');
+const world2 = require('./js/server_world2');
 const path = require('path');
 const hbs = require('express-handlebars');
 const passport = require('passport');
@@ -46,7 +47,6 @@ require('./config/passport')(passport);
 // Authenticate middleware
 const authenticate = (req, res, next) => {
     if (req.isAuthenticated()) { 
-        console.log("authenticated");
         return next(); 
     }
     res.redirect('/auth/google');
@@ -65,6 +65,13 @@ app.get('/auth/google/logout', authenticate, (req, res) => {
 // Routes
 app.get('/', authenticate, (req, res) => {
     res.render('index', {
+        user: req.user
+    });
+});
+
+app.get('/mode2', authenticate, (req, res) => {
+    res.render('mode2', {
+        layout: 'layout_one',
         user: req.user
     });
 });
@@ -92,8 +99,11 @@ const io = socketIO(server, { wsEngine: 'ws' });
 io.on('connection', (socket) => {
     console.log('a user connected');
 
-    var id;
-    var player;
+    var id = null;
+    var player = null;
+
+    var id2 = null;
+    var player2 = null;
 
     socket.on('connectMultiplayerOne', () => {
         socket.join('multiplayer1');
@@ -107,6 +117,7 @@ io.on('connection', (socket) => {
         socket.to('multiplayer1').emit('addOtherPlayer', player);
     })
 
+    //MULTIPLAYER 1
     socket.on('requestOldPlayers', () => {
         for (var i = 0; i < world.players.length; i++){
             if (world.players[i].playerId != id)
@@ -129,8 +140,16 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('user disconnected');
-        io.in('multiplayer1').emit('removeOtherPlayer', player);
-        world.removePlayer( player );
+        if(player) {
+            io.in('multiplayer1').emit('removeOtherPlayer', player);
+            world.removePlayer( player );
+        }
+
+        if(player2) {
+            io.in('multiplayer2').emit('removeOtherPlayer', player2);
+            world2.removePlayer( player2 );
+        }
+
     });
 
     socket.on('playerShooting', id => {
@@ -142,4 +161,45 @@ io.on('connection', (socket) => {
         io.in('multiplayer1').emit('endGame', playerName)
     })
 
+    socket.on('connectMultiplayerTwo', () => {
+        socket.join('multiplayer2');
+
+        id2 = socket.id;
+        world2.addPlayer(id2);
+
+        player2 = world2.playerForId(id2);
+        socket.emit('createPlayer2', player2);
+
+        socket.to('multiplayer2').emit('addOtherPlayer', player2);
+    })
+
+    //MULTIPLAYER 2
+    socket.on('requestOldPlayers2', () => {
+        for (var i = 0; i < world2.players.length; i++){
+            if (world2.players[i].playerId != id2)
+                socket.emit('addOtherPlayer', world2.players[i]);
+        }
+    });
+
+    socket.on('updatePosition2', data => {
+        var newData = world2.updatePlayerData(data);
+        socket.to('multiplayer2').emit('updatePosition', newData);
+    });
+
+    socket.on('moveFrontClient2', () => {
+        socket.to('multiplayer2').emit('moveFrontServer');
+    });
+
+    socket.on('moveBackClient2', () => {
+        socket.to('multiplayer2').emit('moveBackServer');
+    });
+
+    socket.on('playerShooting2', id => {
+        var bullet = world2.createBullet(id);
+        io.in('multiplayer2').emit('shootBullet', bullet)
+    })
+
+    socket.on('playerWon2', (playerName) => {
+        io.in('multiplayer2').emit('endGame', playerName)
+    })
 });
