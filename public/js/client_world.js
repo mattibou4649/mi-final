@@ -640,6 +640,7 @@ var shootBullet = data => {
 }
 
 var finishAndPost = async (data) => {
+    alert(`${data} won!`);
     if(data != $("#playerId").html()){
         const dataCall = {
             userWon: data,
@@ -651,10 +652,9 @@ var finishAndPost = async (data) => {
             type: 'POST',
             data: dataCall
         });
-    
+        location.reload();
     }
-    alert(`${data} won!`)
-    setTimeout(location.reload(), 3000);
+    location.reload();
 }
 
 window.addEventListener('keydown', keyDown);
