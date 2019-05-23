@@ -53,7 +53,6 @@
 
         socket.on('createPlayer', function(data){
             createPlayer(data);
-            console.log('loco')
         });
 
         socket.on('addOtherPlayer', function(data){
@@ -69,7 +68,7 @@
         })
 
         socket.on('endGame', function(data){
-            finishAndPost();
+            finishAndPost(data);
         })
     </script>
 </body>

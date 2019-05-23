@@ -122,7 +122,3 @@ io.on('connection', (socket) => {
     })
 
 });
-
-// app.listen(app.get('port'), function(){
-//     console.log( "Listening");
-// })

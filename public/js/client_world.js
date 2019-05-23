@@ -591,8 +591,9 @@ var shootBullet = data => {
     player.canShoot = 80;
 }
 
-var finishAndPost = () => {
-    location.reload();
+var finishAndPost = (data) => {
+    alert(`${data} won!`)
+    setTimeout(location.reload(), 3000)
 }
 
 window.addEventListener('keydown', keyDown);
