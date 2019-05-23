@@ -639,9 +639,22 @@ var shootBullet = data => {
     player.canShoot = 80;
 }
 
-var finishAndPost = (data) => {
+var finishAndPost = async (data) => {
+    if(data != $("#playerId").html()){
+        const dataCall = {
+            userWon: data,
+            score: `5 - ${playerObj.score}`,
+            userLost: $("#playerId").html()
+        }
+        await $.ajax({
+            url: '/score',
+            type: 'POST',
+            data: dataCall
+        });
+    
+    }
     alert(`${data} won!`)
-    setTimeout(location.reload(), 3000)
+    setTimeout(location.reload(), 3000);
 }
 
 window.addEventListener('keydown', keyDown);

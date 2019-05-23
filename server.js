@@ -10,6 +10,8 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
+const Score = require('./models/Score');
+
 dotenv.config()
 
 // HBS
@@ -71,6 +73,14 @@ app.get('/logout', (req, res) => {
     req.logout();
     res.redirect('/auth/google');
 });
+
+app.post('/score', async (req, res) => {
+    const { userWon, score, userLost } = req.body;
+    
+    var newScore = new Score({userWon, score, userLost});
+
+    await newScore.save();
+})
 
 app.set('port', (process.env.PORT || 3000));
 const server = app.listen(app.get('port'), () => console.log(`Listening`)); 
