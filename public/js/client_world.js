@@ -8,8 +8,19 @@ var mixers = [];
 var otherMixers = [];
 var deltaTime;
 var shot = false;
+var timeClock = 0;
 
 var raycaster = new THREE.Raycaster();
+
+var listener = new THREE.AudioListener();
+var sound = new THREE.Audio(listener);
+var audioLoader = new THREE.AudioLoader();
+audioLoader.load('/sound/csgo.ogg', function(buffer) {
+	sound.setBuffer(buffer);
+	sound.setLoop(true);
+    sound.setVolume(0.2);
+    sound.play();
+});
 
 var keyboard = {};
 var player = { height:1.8, speed:0.2, turnSpeed:Math.PI*0.02, canShoot:0 };
@@ -109,7 +120,37 @@ function loadWorld(){
         light.shadow.camera.near = 0.1;
         light.shadow.camera.far = 25;
         scene.add(light);
-        
+
+        var particleCount = 1800,
+        particles = new THREE.Geometry(),
+        pMaterial = new THREE.PointsMaterial({
+            color: 0xFFFFFF,
+            size: 2
+        });
+    
+        var texture = new THREE.TextureLoader().load('/models/particle.png');
+        var pMaterial = new THREE.PointsMaterial({
+            color: 0xFFFFFF,
+            size: 1,
+            map: texture,
+            blending: THREE.AdditiveBlending,
+            transparent: true
+        });
+        for (var p = 0; p < particleCount; p++) {
+        //Creamos particulas con posiciones random entre un rango , para que se dispersen
+          var pX = Math.random() * 500 - 250,
+              pY = Math.random() * 500 - 250,
+              pZ = Math.random() * 500 - 250,
+              particle = new THREE.Vector3(pX, pY, pZ);
+          //Se agrega a la geometria
+          particles.vertices.push(particle);
+        }
+        particleSystem = new THREE.Points( particles, pMaterial);
+        particleSystem.sortParticles = true;
+    
+        particleSystem.name = "particulas";
+
+        scene.add(particleSystem);
         
         var textureLoader = new THREE.TextureLoader(loadingManager);
         crateTexture = textureLoader.load("/js/crate0/crate0_diffuse.jpg");
@@ -248,11 +289,18 @@ function animate(){
 	// 	return;
     // }
 
-    requestAnimationFrame(animate);
+    var id = requestAnimationFrame(animate);
     
 	
 	var time = Date.now() * 0.0005;
     var delta = clock.getDelta();
+
+    timeClock += 5
+
+    // if(timeClock >= 2000) {
+    //     console.log("locote")
+    //     cancelAnimationFrame(id);
+    // }
     
     // go through bullets array and update position
 	// remove bullets when appropriate
@@ -280,7 +328,8 @@ function animate(){
                     socket.emit('playerWon', $("#playerId").html());
                 }
                 console.log(playerObj.score)
-                continue;
+                bullets.splice(index,1);
+                break;
             }
         }	
     }
@@ -548,7 +597,7 @@ var playerForId = id => {
 var shootBullet = data => {
     // creates a bullet as a Mesh object
     var bullet = new THREE.Mesh(
-        new THREE.SphereGeometry(0.05,8,8),
+        new THREE.SphereGeometry(0.8,8,8),
         new THREE.MeshBasicMaterial({color:0xffffff})
     );
     
@@ -590,8 +639,9 @@ var shootBullet = data => {
     player.canShoot = 80;
 }
 
-var finishAndPost = () => {
-    location.reload();
+var finishAndPost = (data) => {
+    alert(`${data} won!`)
+    setTimeout(location.reload(), 3000)
 }
 
 window.addEventListener('keydown', keyDown);
