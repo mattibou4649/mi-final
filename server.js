@@ -64,7 +64,7 @@ app.get('/logout', (req, res) => {
 app.set('port', (process.env.PORT || 3000));
 const server = app.listen(app.get('port'), () => console.log(`Listening`)); 
 
-const io = socketIO(server);
+const io = socketIO(server, { wsEngine: 'ws' });
 
 
 // Handle connection
