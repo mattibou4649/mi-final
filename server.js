@@ -7,6 +7,8 @@ const path = require('path');
 const hbs = require('express-handlebars');
 const passport = require('passport');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 
 dotenv.config()
 
@@ -21,6 +23,15 @@ app.set('view engine', 'hbs');
 
 // Public folder
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Body Parser middleware
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
+
+// Mongo Connection
+mongoose.connect(`mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@ds341825.mlab.com:41825/mi-final`, {useNewUrlParser: true}).then(() => {
+    console.log('MongoDB Connected!');
+}).catch(e => console.log(e));
 
 // Passport middleware
 app.use(require('express-session')({ secret: process.env.EXPRESS_SESSION_KEY, resave: true, saveUninitialized: true }));
